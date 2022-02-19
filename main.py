@@ -1,3 +1,5 @@
+import random
+
 from tqdm import tqdm
 
 from src.io import get_answer_words, get_guesses_words
@@ -7,6 +9,9 @@ from src.solver.solver import Solver
 
 answer_words = get_answer_words()
 guesses_words = get_guesses_words()
+
+random.shuffle(answer_words)
+random.shuffle(guesses_words)
 
 
 def ev():

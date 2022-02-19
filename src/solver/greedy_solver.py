@@ -48,7 +48,16 @@ class GreedySolver(Solver):
 
     def make_guess(self) -> str:
         L = self.possible_answer_words()
-        return L[len(L) // 2]
+
+        def unique_chars(s):
+            return len(set([c for c in s]))
+
+        # Prioritise knowledge. Prefer words that have many unique letters
+        for num in range(5, 0, -1):
+            for guess in L:
+                if unique_chars(guess) == num:
+                    return guess
+        raise RuntimeError("Shouldn't be possible")
 
     def print_if_verbose(self, arg):
         if self.verbose:
