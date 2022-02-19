@@ -1,7 +1,6 @@
 from typing import List
 
 from overrides import overrides
-from tqdm import tqdm
 
 from ..logic.wordle import Wordle, calc_wordle
 from ..utils.word_filter import WordFilter
@@ -15,39 +14,36 @@ def memoised_make_guess(guesses, results, answer_words_left, guesses_words, memo
         return memo.memo[result_key]
 
     if len(answer_words_left) == 1:
-        print(f"1 left: {answer_words_left[0]}")
+        memo.memo[result_key] = answer_words_left[0]
         return answer_words_left[0]
 
     # If there are two words left, ev = 1.5 no matter what you choose
     if len(answer_words_left) <= 2:
-        print(f"2 left: {answer_words_left[0]}")
+        memo.memo[result_key] = answer_words_left[0]
         return answer_words_left[0]
 
-    # Hypothetical - what if we guessed "guess"
     best_guess = ""
     lowest_expected_num_words_left = 1e9  # We want to lower this!!
-    for guess in tqdm(guesses_words):
-        # If we did, these are the possible words left for each answer
-        num_words_left_possibilities = []
-        for possible_answer in answer_words_left:
-            result = calc_wordle(possible_answer, guess)
-            # See which word from answer_words_left would also have the same outcome
-            num_words_left = sum(
-                [
-                    1 if calc_wordle(fake_answer, guess) == result else 0
-                    for fake_answer in answer_words_left
-                ]
-            )
-            num_words_left_possibilities.append(num_words_left)
 
-        expected_num_words_left = sum(num_words_left_possibilities) / len(
-            num_words_left_possibilities
-        )
+    # Hypothetical - what if we guessed "guess"
+    for guess in guesses_words:  # 10_000
+        result_to_answer_dict = {}  # result -> List of answers that it could be
+        for possible_answer_word in answer_words_left:  # 2_000
+            result = calc_wordle(possible_answer_word, guess)
+            result_to_answer_dict[result] = result_to_answer_dict.get(result, 0) + 1
+
+        # It could proportionately be any of those results
+        sum = 0
+        cnt = 0
+        for result, num_answers in result_to_answer_dict.items():
+            sum += num_answers
+            cnt += 1
+
+        expected_num_words_left = sum / cnt
         if expected_num_words_left < lowest_expected_num_words_left:
             lowest_expected_num_words_left = expected_num_words_left
             best_guess = guess
 
-    print(f"{best_guess=} {len(answer_words_left)}->{lowest_expected_num_words_left}")
     memo.memo[result_key] = best_guess  # memoise
     return best_guess
 
