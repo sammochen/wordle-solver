@@ -1,4 +1,3 @@
-from logging import Filter
 from typing import List
 
 from .logic.wordle import Wordle
@@ -12,21 +11,30 @@ class Solver:
         self.answer_words = answer_words
         self.guesses_words = guesses_words
 
+        self.filtered_answer_words = answer_words
+        self.filtered_guesses_words = guesses_words
+
         self.guesses = []
         self.results = []
 
     def possible_word(self, word: str) -> bool:
         fake_wordle = Wordle(word)
-        for i in range(len(self.guesses)):
+        for i in range(len(self.guesses) - 1, -1, -1):
             if fake_wordle.guess(self.guesses[i]) != self.results[i]:
                 return False
         return True
 
     def possible_answer_words(self) -> List[str]:
-        return filter(self.possible_word, self.answer_words)
+        self.filtered_answer_words = filter(
+            self.possible_word, self.filtered_answer_words
+        )
+        return self.filtered_answer_words
 
     def possible_guesses_words(self) -> List[str]:
-        return filter(self.possible_word, self.guesses_words)
+        self.filtered_guesses_words = filter(
+            self.possible_word, self.filtered_guesses_words
+        )
+        return self.filtered_guesses_words
 
     def make_guess(self) -> str:
         """Uses the current state and chooses the best word to guess next
