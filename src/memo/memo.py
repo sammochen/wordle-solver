@@ -9,16 +9,14 @@ class Memo:
 
     def __enter__(self):
         if not os.path.exists(self.memo_path):
-            print("Could not load memo - starting fresh")
+            print(f"Warning: {self.memo_path=} does not exist. Starting fresh...")
             self.memo = {}
             return self
 
         with open(self.memo_path) as f:
-            print("Loading memo")
             self.memo = json.load(f)
             return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         with open(self.memo_path, "w") as f:
-            print("Writing memo")
             json.dump(self.memo, f, sort_keys=True)
