@@ -1,6 +1,6 @@
 from typing import List
 
-from src.logic.wordle import Wordle
+from ..logic.wordle import Wordle
 
 
 class WordFilter:

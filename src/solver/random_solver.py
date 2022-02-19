@@ -2,9 +2,8 @@ from typing import List
 
 from overrides import overrides
 
-from src.utils.word_filter import WordFilter
-
 from ..logic.wordle import Wordle
+from ..utils.word_filter import WordFilter
 from .solver import Solver
 
 
@@ -46,9 +45,7 @@ class RandomSolver(Solver):
     def solve(self) -> int:
         while True:
             # Make a guess
-            self.num_guesses += 1
-
-            guess = "SALET" if self.num_guesses == 1 else self.make_guess()
+            guess = "SALET" if self.wordle.num_guesses == 1 else self.make_guess()
             result = self.wordle.guess(guess)
 
             self.print_if_verbose(f"Guess:  {guess}")
@@ -57,7 +54,7 @@ class RandomSolver(Solver):
             self.word_filter.add_filter(guess, result)
 
             if result == "GGGGG":  # 5 Greens!
-                return self.num_guesses
+                return self.wordle.num_guesses
 
-            if self.num_guesses >= 50:
+            if self.wordle.num_guesses >= 50:
                 raise RuntimeError("Dumbass")
