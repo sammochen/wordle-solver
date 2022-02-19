@@ -1,30 +1,30 @@
 class Wordle:
-    def __init__(self, targetWord: str):
-        self.targetWord: str = targetWord.lower()
+    def __init__(self, target_word: str):
+        self.target_word: str = target_word.lower()
 
-    def guess(self, guessWord: str) -> str:
-        guessWord = guessWord.lower()
+    def guess(self, guess_word: str) -> str:
+        guess_word = guess_word.lower()
 
-        answer = ["-" for _ in guessWord]
+        answer = ["-" for _ in guess_word]
 
         # Helper dict that tracks the frequency of each letter
-        targetLetterFreq = {}
-        for letter in self.targetWord:
-            targetLetterFreq[letter] = targetLetterFreq.get(letter, 0) + 1
+        target_letter_freq = {}
+        for letter in self.target_word:
+            target_letter_freq[letter] = target_letter_freq.get(letter, 0) + 1
 
         # First sweep - checks whether any letters are green
         for i in range(5):
-            if self.targetWord[i] == guessWord[i]:
+            if self.target_word[i] == guess_word[i]:
                 answer[i] = "G"  # Green
-                targetLetterFreq[self.targetWord[i]] -= 1
+                target_letter_freq[self.target_word[i]] -= 1
 
         # Second sweep - if there are any letters left that are also in the targetWord
         for i in range(5):
-            if self.targetWord[i] == guessWord[i]:
+            if self.target_word[i] == guess_word[i]:
                 continue
 
-            if targetLetterFreq.get(guessWord[i], 0) != 0:
+            if target_letter_freq.get(guess_word[i], 0) != 0:
                 answer[i] = "Y"  # Yellow
-                targetLetterFreq[guessWord[i]] -= 1
+                target_letter_freq[guess_word[i]] -= 1
 
         return "".join(answer)
