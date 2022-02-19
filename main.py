@@ -5,12 +5,12 @@ from src.logic.wordle import Wordle
 from src.solver.greedy_solver import GreedySolver
 from src.solver.solver import Solver
 
+answer_words = get_answer_words()
+guesses_words = get_guesses_words()
 
-def main():
+
+def ev():
     result_dict = {}
-
-    answer_words = get_answer_words()
-    guesses_words = get_guesses_words()
 
     for word in tqdm(answer_words):
         wordle = Wordle(word)
@@ -26,7 +26,19 @@ def main():
         sum += result * freq
         cnt += freq
 
-    print(f"EV: {sum / cnt:.2f}")
+    print(f"EV: {sum / cnt:.3f}")
+
+
+def single(word: str):
+    wordle = Wordle(word)
+    solver: Solver = GreedySolver(wordle, answer_words, guesses_words, verbose=True)
+    result = solver.solve()
+    print(result)
+
+
+def main():
+    ev()
+    # single("horse")
 
 
 if __name__ == "__main__":

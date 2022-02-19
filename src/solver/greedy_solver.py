@@ -8,17 +8,24 @@ from .solver import Solver
 
 class GreedySolver(Solver):
     def __init__(
-        self, wordle: Wordle, answer_words: List[str], guesses_words: List[str]
+        self,
+        wordle: Wordle,
+        answer_words: List[str],
+        guesses_words: List[str],
+        verbose: bool = False,
     ):
         self.wordle = wordle
         self.answer_words = answer_words
         self.guesses_words = guesses_words
+        self.verbose = verbose
 
         self.filtered_answer_words = answer_words
         self.filtered_guesses_words = guesses_words
 
         self.guesses = []
         self.results = []
+
+        self.num_guesses = 0
 
     def possible_word(self, word: str) -> bool:
         fake_wordle = Wordle(word)
@@ -28,36 +35,42 @@ class GreedySolver(Solver):
         return True
 
     def possible_answer_words(self) -> List[str]:
-        self.filtered_answer_words = filter(
-            self.possible_word, self.filtered_answer_words
+        self.filtered_answer_words = list(
+            filter(self.possible_word, self.filtered_answer_words)
         )
         return self.filtered_answer_words
 
     def possible_guesses_words(self) -> List[str]:
-        self.filtered_guesses_words = filter(
-            self.possible_word, self.filtered_guesses_words
+        self.filtered_guesses_words = list(
+            filter(self.possible_word, self.filtered_guesses_words)
         )
         return self.filtered_guesses_words
 
     def make_guess(self) -> str:
-        """Uses the current state and chooses the best word to guess next
+        L = self.possible_answer_words()
+        return L[len(L) // 2]
 
-        Returns:
-            str: The chosen 5 letter word as the next best guess
-        """
-        return next(self.possible_answer_words())
+    def print_if_verbose(self, arg):
+        if self.verbose:
+            print(arg)
 
     @overrides
     def solve(self) -> int:
-        for num_guess in range(1, 100):
+        while True:
             # Make a guess
+            self.num_guesses += 1
+
             guess = self.make_guess()
             result = self.wordle.guess(guess)
 
-            if result == "GGGGG":  # 5 Greens!
-                return num_guess
+            self.print_if_verbose(f"Guess:  {guess}")
+            self.print_if_verbose(f"Result: {result}")
 
             self.guesses.append(guess)
             self.results.append(result)
 
-        raise RuntimeError("Stupid")
+            if result == "GGGGG":  # 5 Greens!
+                return self.num_guesses
+
+            if self.num_guesses >= 50:
+                raise RuntimeError("Dumbass")
