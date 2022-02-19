@@ -1,9 +1,12 @@
 from typing import List
 
-from .logic.wordle import Wordle
+from overrides import overrides
+
+from ..logic.wordle import Wordle
+from .solver import Solver
 
 
-class Solver:
+class GreedySolver(Solver):
     def __init__(
         self, wordle: Wordle, answer_words: List[str], guesses_words: List[str]
     ):
@@ -44,6 +47,7 @@ class Solver:
         """
         return next(self.possible_answer_words())
 
+    @overrides
     def solve(self) -> int:
         for num_guess in range(1, 100):
             # Make a guess

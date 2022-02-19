@@ -1,4 +1,4 @@
-from src.logic.wordle import Wordle
+from .wordle import Wordle
 
 
 def test_wordle_abcde():
