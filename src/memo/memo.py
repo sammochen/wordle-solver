@@ -10,7 +10,7 @@ class Memo:
     def __enter__(self):
         if not os.path.exists(self.memo_path):
             print("Could not load memo - starting fresh")
-            self.memo = {"": "salet"}
+            self.memo = {}
             return self
 
         with open(self.memo_path) as f:
