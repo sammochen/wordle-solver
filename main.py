@@ -1,25 +1,23 @@
-import random
-
 from tqdm import tqdm
 
 from src.io import get_answer_words, get_guesses_words
 from src.logic.wordle import Wordle
+from src.memo.memo import Memo
 from src.solver.greedy_solver import GreedySolver
-from src.solver.random_solver import RandomSolver
 from src.solver.solver import Solver
 
 answer_words = get_answer_words()
 guesses_words = get_guesses_words()
 
 
-def ev():
+def ev(memo):
     result_dict = {}
     results = []
 
     tqdm_bar = tqdm(answer_words)
     for word in tqdm_bar:
         wordle = Wordle(word)
-        solver: Solver = GreedySolver(wordle, answer_words, guesses_words)
+        solver: Solver = GreedySolver(wordle, answer_words, guesses_words, memo)
         result = solver.solve()
 
         result_dict[result] = result_dict.get(result, 0) + 1
@@ -32,16 +30,19 @@ def ev():
     print(f"EV: {(sum(results) / len(results)):.3f}")
 
 
-def single(word: str):
+def single(word: str, memo):
     wordle = Wordle(word)
-    solver: Solver = GreedySolver(wordle, answer_words, guesses_words, verbose=True)
+    solver: Solver = GreedySolver(
+        wordle, answer_words, guesses_words, memo, verbose=True
+    )
     result = solver.solve()
     print(result)
 
 
 def main():
-    # ev()
-    single("tacit")
+    with Memo() as memo:
+        ev(memo)
+        # single("horse", memo)
 
 
 if __name__ == "__main__":
