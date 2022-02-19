@@ -19,7 +19,7 @@ def ev():
 
     for word in tqdm(answer_words):
         wordle = Wordle(word)
-        solver: Solver = RandomSolver(wordle, answer_words, guesses_words)
+        solver: Solver = RandomSolver(wordle, answer_words)
         result = solver.solve()
 
         result_dict[result] = result_dict.get(result, 0) + 1
@@ -36,7 +36,7 @@ def ev():
 
 def single(word: str):
     wordle = Wordle(word)
-    solver: Solver = RandomSolver(wordle, answer_words, guesses_words, verbose=True)
+    solver: Solver = RandomSolver(wordle, answer_words, verbose=True)
     result = solver.solve()
     print(result)
 
