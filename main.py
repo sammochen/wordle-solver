@@ -10,9 +10,6 @@ from src.solver.solver import Solver
 answer_words = get_answer_words()
 guesses_words = get_guesses_words()
 
-random.shuffle(answer_words)
-random.shuffle(guesses_words)
-
 
 def ev():
     result_dict = {}

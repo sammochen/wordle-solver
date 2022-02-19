@@ -25,12 +25,15 @@ class RandomSolver(Solver):
         self.num_guesses = 0
 
     def make_guess(self) -> str:
+        words = self.word_filter.words
+
+        # TODO choose also based on frequency
         def unique_chars(s):
             return len(set([c for c in s]))
 
         # Prioritise knowledge. Prefer words that have many unique letters
         for num in range(5, 0, -1):
-            for guess in self.word_filter.words:
+            for guess in words:
                 if unique_chars(guess) == num:
                     return guess
         raise RuntimeError("Shouldn't be possible")
