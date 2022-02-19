@@ -6,7 +6,8 @@ from ..logic.wordle import Wordle
 from .solver import Solver
 
 
-class GreedySolver(Solver):
+class RandomSolver(Solver):
+    """Randomly chooses next guess from answer_words. The guess will always be a possible candidate."""
     def __init__(
         self,
         wordle: Wordle,

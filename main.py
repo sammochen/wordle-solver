@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 from src.io import get_answer_words, get_guesses_words
 from src.logic.wordle import Wordle
-from src.solver.greedy_solver import GreedySolver
+from src.solver.random_solver import RandomSolver
 from src.solver.solver import Solver
 
 answer_words = get_answer_words()
@@ -19,7 +19,7 @@ def ev():
 
     for word in tqdm(answer_words):
         wordle = Wordle(word)
-        solver: Solver = GreedySolver(wordle, answer_words, guesses_words)
+        solver: Solver = RandomSolver(wordle, answer_words, guesses_words)
         result = solver.solve()
 
         result_dict[result] = result_dict.get(result, 0) + 1
@@ -36,7 +36,7 @@ def ev():
 
 def single(word: str):
     wordle = Wordle(word)
-    solver: Solver = GreedySolver(wordle, answer_words, guesses_words, verbose=True)
+    solver: Solver = RandomSolver(wordle, answer_words, guesses_words, verbose=True)
     result = solver.solve()
     print(result)
 
