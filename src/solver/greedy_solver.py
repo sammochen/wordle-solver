@@ -33,16 +33,16 @@ class GreedySolver(Solver):
 
     def make_guess(self):
         # Choose a word from guesses_words such that it minimises the expected number of answer_words left
-        # Depends on current number of words left
-        best_guess = ""
-        lowest_expected_num_words_left = 1e9  # We want to lower this!!
         answer_words_left = self.word_filter.words
 
-        if len(answer_words_left) == 1:
+        # If there are two words left, ev = 1.5 no matter what you choose
+        if len(answer_words_left) <= 2:
             return answer_words_left[0]
 
         # Hypothetical - what if we guessed "guess"
-        for guess in self.guesses_words:
+        best_guess = ""
+        lowest_expected_num_words_left = 1e9  # We want to lower this!!
+        for guess in tqdm(self.guesses_words) if self.verbose else self.guesses_words:
             # If we did, these are the possible words left for each answer
             num_words_left_possibilities = []
             for possible_answer in answer_words_left:
@@ -63,7 +63,8 @@ class GreedySolver(Solver):
                 lowest_expected_num_words_left = expected_num_words_left
                 best_guess = guess
 
-        print(f"{best_guess=} {lowest_expected_num_words_left}")
+        if self.verbose:
+            print(f"{best_guess=} {lowest_expected_num_words_left}")
         return best_guess
 
     @overrides

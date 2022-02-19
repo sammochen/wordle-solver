@@ -40,8 +40,8 @@ def single(word: str):
 
 
 def main():
-    ev()
-    # single("horse")
+    # ev()
+    single("tacit")
 
 
 if __name__ == "__main__":
