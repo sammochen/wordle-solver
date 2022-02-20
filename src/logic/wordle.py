@@ -35,3 +35,15 @@ class Wordle:
     def guess(self, guess_word: str) -> str:
         self.num_guesses += 1
         return calc_wordle(self.answer_word, guess_word)
+
+
+class UnknownWordle:
+    def __init__(self):
+        self.num_guesses = 0
+
+    def guess(self, guess_word: str) -> str:
+        self.num_guesses += 1
+
+        print(f"Guessing: {guess_word}")
+        result = input("> Result: ")
+        return result

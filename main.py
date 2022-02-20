@@ -1,7 +1,7 @@
 from tqdm import tqdm
 
 from src.io import get_answer_words, get_guesses_words
-from src.logic.wordle import Wordle
+from src.logic.wordle import UnknownWordle, Wordle
 from src.memo.memo import Memo
 from src.solver.greedy_solver import GreedySolver
 from src.solver.solver import Solver
@@ -39,8 +39,17 @@ def single(word: str, memo):
     print(result)
 
 
+def unknown(memo):
+    wordle = UnknownWordle()
+    solver: Solver = GreedySolver(
+        wordle, answer_words, guesses_words, memo, verbose=True
+    )
+    solver.solve()
+
+
 def main():
     with Memo() as memo:
+        # unknown(memo)
         ev(memo)
         # single("horse", memo)
 
