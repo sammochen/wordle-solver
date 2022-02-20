@@ -12,4 +12,6 @@ def get_answer_words():
 
 
 def get_guesses_words():
-    return get_words(Path(__file__).parent.parent / "words" / "answers.txt")
+    return get_answer_words() + get_words(
+        Path(__file__).parent.parent / "words" / "answers.txt"
+    )

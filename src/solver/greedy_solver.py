@@ -8,17 +8,14 @@ from .solver import Solver
 
 
 def memoised_make_guess(guesses, results, answer_words_left, guesses_words, memo):
+    answer_words_left_set = set(answer_words_left)  # Improve runtime
+
     # The results alone will fully determine answer_words_left
     result_key = "".join(results)
     if result_key in memo.memo:
         return memo.memo[result_key]
 
     if len(answer_words_left) == 1:
-        memo.memo[result_key] = answer_words_left[0]
-        return answer_words_left[0]
-
-    # If there are two words left, ev = 1.5 no matter what you choose
-    if len(answer_words_left) <= 2:
         memo.memo[result_key] = answer_words_left[0]
         return answer_words_left[0]
 
@@ -41,6 +38,13 @@ def memoised_make_guess(guesses, results, answer_words_left, guesses_words, memo
 
         expected_num_words_left = sum / cnt
         if expected_num_words_left < lowest_expected_num_words_left:
+            lowest_expected_num_words_left = expected_num_words_left
+            best_guess = guess
+        elif (
+            abs(expected_num_words_left - lowest_expected_num_words_left) <= 1e-2
+            and guess in answer_words_left_set
+        ):
+            # Prefer to guess a word that is in answer_words_left_set if similar
             lowest_expected_num_words_left = expected_num_words_left
             best_guess = guess
 

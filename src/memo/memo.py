@@ -9,8 +9,10 @@ class Memo:
 
     def __enter__(self):
         if not os.path.exists(self.memo_path):
-            print(f"Warning: {self.memo_path=} does not exist. Starting fresh...")
             self.memo = {}
+            print(
+                f"Warning: {self.memo_path=} does not exist. Starting fresh with {self.memo=}"
+            )
             return self
 
         with open(self.memo_path) as f:

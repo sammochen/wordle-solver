@@ -27,7 +27,7 @@ def ev(memo):
     for result, freq in sorted(result_dict.items()):
         print(f"In {result} guesses: {freq} times")
 
-    print(f"EV: {(sum(results) / len(results)):.3f}")
+    print(f"EV: {(sum(results) / len(results)):.6f}")
 
 
 def single(word: str, memo):
