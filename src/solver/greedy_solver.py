@@ -8,8 +8,6 @@ from .solver import Solver
 
 
 def memoised_make_guess(guesses, results, answer_words_left, guesses_words, memo):
-    answer_words_left_set = set(answer_words_left)  # Improve runtime
-
     # The results alone will fully determine answer_words_left
     result_key = "".join(results)
     if result_key in memo.memo:
@@ -24,29 +22,27 @@ def memoised_make_guess(guesses, results, answer_words_left, guesses_words, memo
 
     # Hypothetical - what if we guessed "guess"
     for guess in guesses_words:  # 10_000
-        result_to_answer_dict = {}  # result -> List of answers that it could be
+        result_freq_dict = {}  # result -> List of answers that it could be
         for possible_answer_word in answer_words_left:  # 2_000
             result = calc_wordle(possible_answer_word, guess)
-            result_to_answer_dict[result] = result_to_answer_dict.get(result, 0) + 1
+            result_freq_dict[result] = result_freq_dict.get(result, 0) + 1
 
         # It could proportionately be any of those results
         sum = 0
         cnt = 0
-        for result, num_answers in result_to_answer_dict.items():
-            sum += num_answers
+
+        for result, result_freq in result_freq_dict.items():
+            if not result == "GGGGG":
+                sum += result_freq
             cnt += 1
 
         expected_num_words_left = sum / cnt
-        if expected_num_words_left < lowest_expected_num_words_left:
+        if expected_num_words_left <= lowest_expected_num_words_left:
             lowest_expected_num_words_left = expected_num_words_left
             best_guess = guess
-        elif (
-            abs(expected_num_words_left - lowest_expected_num_words_left) <= 1e-2
-            and guess in answer_words_left_set
-        ):
-            # Prefer to guess a word that is in answer_words_left_set if similar
-            lowest_expected_num_words_left = expected_num_words_left
-            best_guess = guess
+
+    if result_key == "":
+        print(f"root: {best_guess}")
 
     memo.memo[result_key] = best_guess  # memoise
     return best_guess
