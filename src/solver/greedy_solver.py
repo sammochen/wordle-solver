@@ -58,9 +58,8 @@ def memoised_make_guess(
 
     candidates.sort(key=lambda x: x[0])
 
-    num_candidates = 3
+    num_candidates = 4
     best_candidates = candidates[:num_candidates]
-    assert len(best_candidates) == 3
 
     # Now that we have our best k guesses, we can actually try them
     best_ev, best_guess = (1e9, "")
