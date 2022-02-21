@@ -2,14 +2,14 @@ from typing import List
 
 from overrides import overrides
 
-from ..io import get_answer_words, get_guesses_words
+from ..io import get_answer_words, get_guess_words
 from ..logic.wordle import Wordle, calc_wordle
 from ..memo.memo import Memo
 from ..utils.word_filter import WordFilter
 from .solver import Solver
 
 answer_words = get_answer_words()
-guesses_words = get_guesses_words()
+guess_words = get_guess_words()
 
 
 def memoised_make_guess(results: List[str], answer_words_left: List[str], memo: Memo):
@@ -25,7 +25,7 @@ def memoised_make_guess(results: List[str], answer_words_left: List[str], memo: 
     lowest_expected_num_words_left = 1e9  # We want to lower this!!
 
     # Hypothetical - what if we guessed "guess"
-    for guess in guesses_words:  # 10_000
+    for guess in guess_words:  # 10_000
         result_freq_dict = {}  # result -> List of answers that it could be
         for possible_answer_word in answer_words_left:  # 2_000
             result = calc_wordle(possible_answer_word, guess)
