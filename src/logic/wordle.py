@@ -1,3 +1,7 @@
+from functools import lru_cache
+
+
+@lru_cache
 def calc_wordle(answer_word: str, guess_word: str) -> str:
     answer_word = answer_word.lower()
     guess_word = guess_word.lower()
@@ -30,20 +34,13 @@ def calc_wordle(answer_word: str, guess_word: str) -> str:
 class Wordle:
     def __init__(self, answer_word: str):
         self.answer_word: str = answer_word.lower()
-        self.num_guesses = 0
 
     def guess(self, guess_word: str) -> str:
-        self.num_guesses += 1
         return calc_wordle(self.answer_word, guess_word)
 
 
 class UnknownWordle:
-    def __init__(self):
-        self.num_guesses = 0
-
     def guess(self, guess_word: str) -> str:
-        self.num_guesses += 1
-
         print(f"Guessing: {guess_word}")
         result = input("> Result: ")
         return result

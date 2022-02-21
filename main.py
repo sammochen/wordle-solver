@@ -17,7 +17,7 @@ def ev(memo):
     tqdm_bar = tqdm(answer_words)
     for word in tqdm_bar:
         wordle = Wordle(word)
-        solver: Solver = GreedySolver(wordle, answer_words, guesses_words, memo)
+        solver: Solver = GreedySolver(wordle, memo)
         result = solver.solve()
 
         result_dict[result] = result_dict.get(result, 0) + 1
@@ -30,20 +30,9 @@ def ev(memo):
     print(f"EV: {(sum(results) / len(results)):.6f}")
 
 
-def single(word: str, memo):
-    wordle = Wordle(word)
-    solver: Solver = GreedySolver(
-        wordle, answer_words, guesses_words, memo, verbose=True
-    )
-    result = solver.solve()
-    print(result)
-
-
 def unknown(memo):
     wordle = UnknownWordle()
-    solver: Solver = GreedySolver(
-        wordle, answer_words, guesses_words, memo, verbose=True
-    )
+    solver: Solver = GreedySolver(wordle, memo)
     solver.solve()
 
 
@@ -51,7 +40,6 @@ def main():
     with Memo() as memo:
         # unknown(memo)
         ev(memo)
-        # single("horse", memo)
 
 
 if __name__ == "__main__":

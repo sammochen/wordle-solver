@@ -2,13 +2,17 @@ from typing import List
 
 from overrides import overrides
 
+from ..io import get_answer_words, get_guesses_words
 from ..logic.wordle import Wordle, calc_wordle
+from ..memo.memo import Memo
 from ..utils.word_filter import WordFilter
 from .solver import Solver
 
+answer_words = get_answer_words()
+guesses_words = get_guesses_words()
 
-def memoised_make_guess(guesses, results, answer_words_left, guesses_words, memo):
-    # The results alone will fully determine answer_words_left
+
+def memoised_make_guess(results: List[str], answer_words_left: List[str], memo: Memo):
     result_key = "".join(results)
     if result_key in memo.memo:
         return memo.memo[result_key]
@@ -41,7 +45,7 @@ def memoised_make_guess(guesses, results, answer_words_left, guesses_words, memo
             lowest_expected_num_words_left = expected_num_words_left
             best_guess = guess
 
-    if result_key == "":
+    if len(answer_words_left) == len(answer_words):
         print(f"root: {best_guess}")
 
     memo.memo[result_key] = best_guess  # memoise
@@ -51,51 +55,30 @@ def memoised_make_guess(guesses, results, answer_words_left, guesses_words, memo
 class GreedySolver(Solver):
     """Greedily choose the guesses_word that minimises the number of answer_words"""
 
-    def __init__(
-        self,
-        wordle: Wordle,
-        answer_words: List[str],
-        guesses_words: List[str],
-        memo,
-        verbose: bool = False,
-    ):
+    def __init__(self, wordle: Wordle, memo):
         self.wordle = wordle
-        self.answer_words = answer_words
-        self.guesses_words = guesses_words
+        self.word_filter = WordFilter(answer_words)
         self.memo = memo
-        self.verbose = verbose
 
         self.guesses = []
         self.results = []
 
-        self.word_filter = WordFilter(self.answer_words)
-
-    def print_if_verbose(self, arg):
-        if self.verbose:
-            print(arg)
-
     @overrides
     def solve(self) -> int:
+        num_guesses = 0
         while True:
+            num_guesses += 1
+
             # Make a guess
-            guess = memoised_make_guess(
-                self.guesses,
-                self.results,
-                self.word_filter.words,
-                self.guesses_words,
-                self.memo,
-            )
+            guess = memoised_make_guess(self.results, self.word_filter.words, self.memo)
             result = self.wordle.guess(guess)
 
             self.guesses.append(guess)
             self.results.append(result)
             self.word_filter.add_filter(guess, result)
 
-            self.print_if_verbose(f"Guess:  {guess}")
-            self.print_if_verbose(f"Result: {result}")
-
             if result == "GGGGG":  # 5 Greens!
-                return self.wordle.num_guesses
+                return num_guesses
 
-            if self.wordle.num_guesses >= 10:
+            if num_guesses >= 10:
                 raise RuntimeError("Dumbass")

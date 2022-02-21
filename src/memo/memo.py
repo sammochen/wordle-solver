@@ -8,7 +8,7 @@ class Memo:
         self.memo = {}  # result concatenated str -> appropriate guess
 
     def __enter__(self):
-        if True or not os.path.exists(self.memo_path):
+        if not os.path.exists(self.memo_path):
             print(
                 f"Warning: {self.memo_path=} does not exist. Starting fresh with {self.memo=}"
             )
