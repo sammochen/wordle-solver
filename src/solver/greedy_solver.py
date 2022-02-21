@@ -58,7 +58,7 @@ def memoised_make_guess(
 
     candidates.sort(key=lambda x: x[0])
 
-    num_candidates = 4
+    num_candidates = min(len(candidates), 7)
     best_candidates = candidates[:num_candidates]
 
     # Now that we have our best k guesses, we can actually try them
