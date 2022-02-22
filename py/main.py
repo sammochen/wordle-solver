@@ -38,8 +38,8 @@ def unknown(memo):
 
 def main():
     with Memo() as memo:
-        # unknown(memo)
-        ev(memo)
+        unknown(memo)
+        # ev(memo)
 
 
 if __name__ == "__main__":
