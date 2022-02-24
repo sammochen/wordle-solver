@@ -1,9 +1,16 @@
 #include <assert.h>
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
+namespace utils {
+template <typename T>
+std::vector<T> concat(std::vector<T> A, const std::vector<T> &&B) {
+  A.insert(A.end(), B.begin(), B.end());
+  return A;
+}
 bool is_lower_case(const std::string &s) {
   for (auto &c : s) {
     if (!(c >= 'a' && c <= 'z'))
@@ -11,10 +18,11 @@ bool is_lower_case(const std::string &s) {
   }
   return true;
 }
+} // namespace utils
 
 std::string calc_wordle(const std::string &target, const std::string &guess) {
-  assert(is_lower_case(target) && is_lower_case(guess));
-  assert(target.size() == guess.size());
+  // assert(utils::is_lower_case(target) && utils::is_lower_case(guess));
+  // assert(target.size() == guess.size());
 
   const int n = target.size();
 
@@ -63,10 +71,7 @@ std::vector<std::string> get_allowed() {
 }
 
 std::vector<std::string> get_guesses() {
-  auto targets = get_targets();
-  auto allowed = get_allowed();
-  targets.insert(targets.end(), allowed.begin(), allowed.end());
-  return targets;
+  return utils::concat(get_targets(), get_allowed());
 }
 
 const std::vector<std::string> targets = get_targets();
@@ -81,28 +86,27 @@ struct evaluation {
 struct state {
   const std::vector<std::string> guesses, results, possible_targets;
 
-  state(const std::vector<std::string> &guesses,
-        const std::vector<std::string> results)
-      : guesses(guesses), results(results),
-        possible_targets(get_possible_targets(guesses, results)) {}
+  state() : possible_targets(io::targets) {}
+  state(std::vector<std::string> &guesses, std::vector<std::string> &results,
+        std::vector<std::string> &possible_targets)
+      : guesses(std::move(guesses)), results(std::move(results)),
+        possible_targets(std::move(possible_targets)) {}
 
-  static std::vector<std::string>
-  get_possible_targets(const std::vector<std::string> &guesses,
-                       const std::vector<std::string> results) {
-    std::vector<std::string> possible_targets;
-    const int n = guesses.size();
-    for (const auto &target : io::targets) {
-      bool ok = true;
-      for (int i = 0; i < n; i++) {
-        if (calc_wordle(target, guesses[i]) != results[i]) {
-          ok = false;
-          break;
-        }
+  state make_next_state(const std::string &guess,
+                        const std::string &result) const {
+    auto next_guesses = guesses;
+    auto next_results = results;
+    std::vector<std::string> next_possible_targets;
+
+    next_guesses.push_back(guess);
+    next_results.push_back(result);
+
+    for (const auto &possible_target : possible_targets) {
+      if (calc_wordle(possible_target, guess) == result) {
+        next_possible_targets.push_back(possible_target);
       }
-      if (ok)
-        possible_targets.push_back(target);
     }
-    return possible_targets;
+    return state(next_guesses, next_results, next_possible_targets);
   }
 };
 
@@ -122,34 +126,66 @@ double
 get_expected_partition_size(const std::string &guess,
                             const std::vector<std::string> &possible_targets) {
   const auto partitions = get_partitions(guess, possible_targets);
-  double sum = 0, cnt = 0;
+  double sum = 0;
   for (auto &[result, targets] : partitions) {
+    if (result == "GGGGG")
+      continue;
     sum += targets.size();
-    cnt += 1;
   }
-  return sum / cnt;
+  return sum / partitions.size();
 }
 
-evaluation get_evaluation(state s) {
-  std::vector<std::pair<double, std::string>> partitions_guesses;
-  int cnt = 0;
-  for (const auto &guess : io::guesses) {
-    double expected_partition_size =
-        get_expected_partition_size(guess, s.possible_targets);
-    partitions_guesses.push_back({expected_partition_size, guess});
+evaluation get_evaluation(const state &cur_state,
+                          const std::vector<int> &explorations) {
+  const int depth = cur_state.guesses.size();
+  const auto &possible_targets = cur_state.possible_targets;
+
+  // Base case - exactly 1 word left
+  if (possible_targets.size() == 1) {
+    return {1, possible_targets[0]};
   }
 
-  std::sort(partitions_guesses.begin(), partitions_guesses.end());
+  std::set<std::pair<double, std::string>> partitions_guesses;
+  for (const auto &guess : io::guesses) {
+    partitions_guesses.insert(
+        {get_expected_partition_size(guess, possible_targets), guess});
 
-  const auto best = partitions_guesses[0];
-  std::cout << best.first << ' ' << best.second << std::endl;
-  // Given the state, try guesses
-  return {5, "salet"};
+    if (partitions_guesses.size() > explorations[depth]) {
+      partitions_guesses.erase(--partitions_guesses.end());
+    }
+  }
+
+  evaluation best_evaluation = {1e9, ""};
+
+  for (const auto &[_expected_partition_size, guess] : partitions_guesses) {
+    if (depth == 0) {
+      std::cout << "In root, guessing: " << guess << std::endl;
+    }
+
+    const auto partitions = get_partitions(guess, possible_targets);
+    double next_ev = 1; // ev of 1, the current guess
+    for (const auto &[result, targets] : partitions) {
+      if (result == "GGGGG")
+        continue;
+
+      const auto next_state = cur_state.make_next_state(guess, result);
+      const auto next_evaluation = get_evaluation(next_state, explorations);
+
+      next_ev += next_evaluation.ev * (double)targets.size() /
+                 (double)possible_targets.size();
+    }
+
+    if (next_ev < best_evaluation.ev) {
+      best_evaluation = {next_ev, guess};
+    }
+  }
+  return best_evaluation;
 }
 
 int main() {
-  const state initial_state({}, {});
+  const std::vector<int> explorations = {5, 5, 5, 5, 5, 5, 5, 5};
 
-  auto ans = get_evaluation(initial_state);
-  std::cout << ans.ev << std::endl;
+  const state initial_state;
+  auto ans = get_evaluation(initial_state, explorations);
+  std::cout << ans.next_guess << " " << ans.ev << std::endl;
 }
