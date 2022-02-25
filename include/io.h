@@ -1,3 +1,5 @@
+#pragma once
+
 #include "utils.h"
 #include <fstream>
 #include <string>
@@ -14,16 +16,19 @@ std::vector<std::string> read_words_from_file(const std::string &&filename) {
   return words;
 }
 
-std::vector<std::string> get_targets() {
+std::vector<std::string> get_target_words() {
   return read_words_from_file("../words/targets.txt");
 }
 
-std::vector<std::string> get_allowed() {
+std::vector<std::string> get_allowed_words() {
   return read_words_from_file("../words/allowed.txt");
 }
 
-const std::vector<std::string> targets = get_targets();
-const std::vector<std::string> allowed = get_allowed();
-const std::vector<std::string> guesses =
-    utils::concat(get_targets(), get_allowed());
+const std::vector<std::string> target_words = get_target_words();
+const std::vector<std::string> allowed_words = get_allowed_words();
+const std::vector<std::string> guess_words =
+    utils::concat(target_words, allowed_words);
+
+const int NUM_TARGETS = target_words.size();
+const int NUM_GUESSES = guess_words.size();
 } // namespace io

@@ -5,61 +5,33 @@
 #include <vector>
 
 #include "include/io.h"
-
-std::string calc_wordle(const std::string &target, const std::string &guess) {
-  const int n = target.size();
-
-  std::string result(n, '-');
-  std::vector<int> target_freq(26);
-  for (auto &c : target) {
-    target_freq[c - 'a']++;
-  }
-
-  // First sweep - greens
-  for (int i = 0; i < n; i++) {
-    if (target[i] == guess[i]) {
-      result[i] = 'G';
-      target_freq[target[i] - 'a']--;
-    }
-  }
-
-  // Second sweep - yellows
-  for (int i = 0; i < n; i++) {
-    if (target[i] == guess[i])
-      continue;
-    if (target_freq[guess[i] - 'a']) {
-      result[i] = 'Y';
-      target_freq[guess[i] - 'a']--;
-    }
-  }
-  return result;
-}
-
-struct evaluation {
-  double ev;
-  std::string next_guess;
-};
+#include "include/wordle.h"
 
 struct state {
-  const std::vector<std::string> guesses, results, possible_targets;
+  const std::vector<types::guess_t> guesses;
+  const std::vector<types::target_t> possible_targets;
+  const std::vector<types::result_t> results;
 
-  state() : possible_targets(io::targets) {}
-  state(std::vector<std::string> &guesses, std::vector<std::string> &results,
-        std::vector<std::string> &possible_targets)
+  state(const std::vector<types::target_t> &possible_targets)
+      : possible_targets(possible_targets) {}
+
+  state(std::vector<types::guess_t> &guesses,
+        std::vector<types::result_t> &results,
+        std::vector<types::target_t> &possible_targets)
       : guesses(std::move(guesses)), results(std::move(results)),
         possible_targets(std::move(possible_targets)) {}
 
-  state make_next_state(const std::string &guess,
-                        const std::string &result) const {
+  state make_next_state(const types::guess_t &guess,
+                        const types::result_t &result) const {
     auto next_guesses = guesses;
     auto next_results = results;
-    std::vector<std::string> next_possible_targets;
+    std::vector<types::target_t> next_possible_targets;
 
     next_guesses.push_back(guess);
     next_results.push_back(result);
 
-    for (const auto &possible_target : possible_targets) {
-      if (calc_wordle(possible_target, guess) == result) {
+    for (types::target_t possible_target : possible_targets) {
+      if (wordle::get_result(possible_target, guess) == result) {
         next_possible_targets.push_back(possible_target);
       }
     }
@@ -67,31 +39,36 @@ struct state {
   }
 };
 
-std::unordered_map<std::string, std::vector<std::string>>
-get_partitions(const std::string &guess,
-               const std::vector<std::string> &possible_targets) {
+std::unordered_map<types::result_key_t, std::vector<types::target_t>>
+get_partitions(const types::guess_t &guess,
+               const std::vector<types::target_t> &possible_targets) {
 
-  std::unordered_map<std::string, std::vector<std::string>> partitions;
+  std::unordered_map<types::result_key_t, std::vector<types::target_t>>
+      partitions;
   for (const auto &possible_target : possible_targets) {
-    const auto result = calc_wordle(possible_target, guess);
-    partitions[result].push_back(possible_target);
+    const auto result = wordle::get_result(possible_target, guess);
+    partitions[result.repr].push_back(possible_target);
   }
   return partitions;
 }
 
-double
-get_expected_partition_size(const std::string &guess,
-                            const std::vector<std::string> &possible_targets) {
+double get_expected_partition_size(
+    const types::guess_t &guess,
+    const std::vector<types::target_t> &possible_targets) {
   const auto partitions = get_partitions(guess, possible_targets);
   double sum = 0;
-  for (auto &[result, targets] : partitions) {
-    if (result == "GGGGG")
+  for (auto &[result_key, targets] : partitions) {
+    if (result_key == types::GGGGG_REPR)
       continue;
     sum += targets.size();
   }
   return sum / partitions.size();
 }
 
+struct evaluation {
+  double ev;
+  types::guess_t next_guess;
+};
 evaluation get_evaluation(const state &cur_state,
                           const std::vector<int> &explorations) {
   const int depth = cur_state.guesses.size();
@@ -102,8 +79,8 @@ evaluation get_evaluation(const state &cur_state,
     return {1, possible_targets[0]};
   }
 
-  std::set<std::pair<double, std::string>> partitions_guesses;
-  for (const auto &guess : io::guesses) {
+  std::set<std::pair<double, types::guess_t>> partitions_guesses;
+  for (types::guess_t guess = 0; guess < io::NUM_GUESSES; guess++) {
     partitions_guesses.insert(
         {get_expected_partition_size(guess, possible_targets), guess});
 
@@ -112,7 +89,7 @@ evaluation get_evaluation(const state &cur_state,
     }
   }
 
-  evaluation best_evaluation = {1e9, ""};
+  evaluation best_evaluation = {1e9, -1};
 
   for (const auto &[_expected_partition_size, guess] : partitions_guesses) {
     if (depth == 0) {
@@ -121,11 +98,12 @@ evaluation get_evaluation(const state &cur_state,
 
     const auto partitions = get_partitions(guess, possible_targets);
     double next_ev = 1; // ev of 1, the current guess
-    for (const auto &[result, targets] : partitions) {
-      if (result == "GGGGG")
+    for (const auto &[result_key, targets] : partitions) {
+      if (result_key == types::GGGGG_REPR)
         continue;
 
-      const auto next_state = cur_state.make_next_state(guess, result);
+      const auto next_state =
+          cur_state.make_next_state(guess, types::result_t(result_key));
       const auto next_evaluation = get_evaluation(next_state, explorations);
 
       next_ev += next_evaluation.ev * (double)targets.size() /
@@ -140,9 +118,13 @@ evaluation get_evaluation(const state &cur_state,
 }
 
 int main() {
-  const std::vector<int> explorations = {5, 5, 5, 5, 5, 5, 5, 5};
+  const std::vector<int> explorations = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-  const state initial_state;
+  std::vector<types::target_t> targets;
+  for (types::target_t target = 0; target < io::NUM_TARGETS; target++) {
+    targets.push_back(target);
+  }
+  const state initial_state(targets);
   auto ans = get_evaluation(initial_state, explorations);
-  std::cout << ans.next_guess << " " << ans.ev << std::endl;
+  std::cout << io::guess_words[ans.next_guess] << " " << ans.ev << std::endl;
 }
