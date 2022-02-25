@@ -1,29 +1,12 @@
 #include <assert.h>
-#include <fstream>
 #include <iostream>
 #include <set>
 #include <unordered_map>
 #include <vector>
 
-namespace utils {
-template <typename T>
-std::vector<T> concat(std::vector<T> A, const std::vector<T> &&B) {
-  A.insert(A.end(), B.begin(), B.end());
-  return A;
-}
-bool is_lower_case(const std::string &s) {
-  for (auto &c : s) {
-    if (!(c >= 'a' && c <= 'z'))
-      return false;
-  }
-  return true;
-}
-} // namespace utils
+#include "include/io.h"
 
 std::string calc_wordle(const std::string &target, const std::string &guess) {
-  // assert(utils::is_lower_case(target) && utils::is_lower_case(guess));
-  // assert(target.size() == guess.size());
-
   const int n = target.size();
 
   std::string result(n, '-');
@@ -51,32 +34,6 @@ std::string calc_wordle(const std::string &target, const std::string &guess) {
   }
   return result;
 }
-
-namespace io {
-std::vector<std::string> read_words_from_file(const std::string &&filename) {
-  std::ifstream fh(filename);
-  std::vector<std::string> words;
-  for (std::string temp; fh >> temp;) {
-    words.push_back(temp);
-  }
-  return words;
-}
-
-std::vector<std::string> get_targets() {
-  return read_words_from_file("words/targets.txt");
-}
-
-std::vector<std::string> get_allowed() {
-  return read_words_from_file("words/allowed.txt");
-}
-
-std::vector<std::string> get_guesses() {
-  return utils::concat(get_targets(), get_allowed());
-}
-
-const std::vector<std::string> targets = get_targets();
-const std::vector<std::string> guesses = get_guesses();
-} // namespace io
 
 struct evaluation {
   double ev;
