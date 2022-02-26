@@ -5,8 +5,20 @@
 
 namespace wordle {
 
+std::vector<std::vector<types::result_key_t>> memo;
+
 types::result_t get_result(const types::target_t target,
                            const types::guess_t guess) {
+  if (memo.size() == 0) {
+    // memo was uninitialised
+    memo.assign(io::NUM_GUESSES,
+                std::vector<types::result_key_t>(io::NUM_TARGETS, -1));
+  }
+
+  types::result_key_t &memo_value = memo[guess][target];
+  if (memo_value != -1)
+    // target/guess combo has been calculated
+    return types::result_t(memo_value);
 
   const std::string target_str = io::target_words[target];
   const std::string guess_str = io::guess_words[guess];
@@ -36,6 +48,8 @@ types::result_t get_result(const types::target_t target,
       target_freq[guess_str[i] - 'a']--;
     }
   }
+
+  memo_value = result.repr;
   return result;
 }
 } // namespace wordle
