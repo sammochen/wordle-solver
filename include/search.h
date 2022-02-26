@@ -84,4 +84,4 @@ search_result search(const state &cur_state,
   return best_search_result;
 }
 
-} // namespace solver
+} // namespace search
