@@ -2,6 +2,7 @@
 
 #include "io.h"
 #include "types.h"
+#include <unordered_map>
 
 namespace wordle {
 
@@ -51,5 +52,20 @@ types::result_t get_result(const types::target_t target,
 
   memo_value = result.key;
   return result;
+}
+
+// Given a guess and possible_targets, return how the guess could partition the
+// targets
+std::unordered_map<types::result_key_t, std::vector<types::target_t>>
+get_partitions(const types::guess_t &guess,
+               const std::vector<types::target_t> &possible_targets) {
+
+  std::unordered_map<types::result_key_t, std::vector<types::target_t>>
+      partitions;
+  for (const auto &possible_target : possible_targets) {
+    const auto result = wordle::get_result(possible_target, guess);
+    partitions[result.key].push_back(possible_target);
+  }
+  return partitions;
 }
 } // namespace wordle
