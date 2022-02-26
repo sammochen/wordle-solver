@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 
-namespace solver {
+namespace search {
 struct state {
   const std::vector<types::guess_t> guesses;
   const std::vector<types::result_t> results;
