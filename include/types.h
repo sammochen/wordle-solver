@@ -3,9 +3,8 @@
 #include <assert.h>
 
 namespace types {
-
 template <int Base> struct base_int {
-  base_int(int repr) : repr(repr) {}
+  base_int(int key) : key(key) {}
   base_int(int n, int v) {
     for (int i = 0; i < n; i++) {
       set(i, v);
@@ -20,16 +19,16 @@ template <int Base> struct base_int {
     return p % 2 ? half_pow * half_pow * Base : half_pow * half_pow;
   }
 
-  int repr = 0;
+  int key = 0;
   void set(int index, int value) {
     assert(value >= 0 && value < Base);
-    repr -= get(index) * base_pow(index);
-    repr += value * base_pow(index);
+    key -= get(index) * base_pow(index);
+    key += value * base_pow(index);
   }
 
-  int get(int index) const { return (repr / base_pow(index)) % Base; }
+  int get(int index) const { return (key / base_pow(index)) % Base; }
 
-  bool operator==(const base_int<Base> &rhs) { return repr == rhs.repr; }
+  bool operator==(const base_int<Base> &rhs) { return key == rhs.key; }
 };
 
 using guess_t = int;  // index to guess_words
@@ -41,5 +40,5 @@ const int RESULT_GREEN = 0;
 const int RESULT_YELLOW = 1;
 const int RESULT_GREY = 2;
 
-const int GGGGG_REPR = result_t(5, RESULT_GREEN).repr;
+const int GGGGG_KEY = result_t(5, RESULT_GREEN).key;
 } // namespace types

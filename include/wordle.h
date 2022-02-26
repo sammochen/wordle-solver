@@ -49,7 +49,7 @@ types::result_t get_result(const types::target_t target,
     }
   }
 
-  memo_value = result.repr;
+  memo_value = result.key;
   return result;
 }
 } // namespace wordle

@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <iostream>
 #include <set>
 #include <unordered_map>
@@ -47,7 +46,7 @@ get_partitions(const types::guess_t &guess,
       partitions;
   for (const auto &possible_target : possible_targets) {
     const auto result = wordle::get_result(possible_target, guess);
-    partitions[result.repr].push_back(possible_target);
+    partitions[result.key].push_back(possible_target);
   }
   return partitions;
 }
@@ -58,7 +57,7 @@ double get_expected_partition_size(
   const auto partitions = get_partitions(guess, possible_targets);
   double sum = 0;
   for (auto &[result_key, targets] : partitions) {
-    if (result_key == types::GGGGG_REPR)
+    if (result_key == types::GGGGG_KEY)
       continue;
     sum += targets.size();
   }
@@ -79,12 +78,15 @@ evaluation get_evaluation(const state &cur_state,
     return {1, possible_targets[0]};
   }
 
+  const int max_size =
+      depth < explorations.size() ? explorations[depth] : explorations.back();
+
   std::set<std::pair<double, types::guess_t>> partitions_guesses;
   for (types::guess_t guess = 0; guess < io::NUM_GUESSES; guess++) {
     partitions_guesses.insert(
         {get_expected_partition_size(guess, possible_targets), guess});
 
-    if (partitions_guesses.size() > explorations[depth]) {
+    if (partitions_guesses.size() > max_size) {
       partitions_guesses.erase(--partitions_guesses.end());
     }
   }
@@ -93,13 +95,13 @@ evaluation get_evaluation(const state &cur_state,
 
   for (const auto &[_expected_partition_size, guess] : partitions_guesses) {
     if (depth == 0) {
-      std::cout << "In root, guessing: " << guess << std::endl;
+      std::cout << io::guess_words[guess] << std::endl;
     }
 
     const auto partitions = get_partitions(guess, possible_targets);
     double next_ev = 1; // ev of 1, the current guess
     for (const auto &[result_key, targets] : partitions) {
-      if (result_key == types::GGGGG_REPR)
+      if (result_key == types::GGGGG_KEY)
         continue;
 
       const auto next_state =
@@ -118,7 +120,7 @@ evaluation get_evaluation(const state &cur_state,
 }
 
 int main() {
-  const std::vector<int> explorations = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  const std::vector<int> explorations = {3, 7, 2};
 
   std::vector<types::target_t> targets;
   for (types::target_t target = 0; target < io::NUM_TARGETS; target++) {
