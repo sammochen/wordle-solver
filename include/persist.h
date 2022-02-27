@@ -1,3 +1,5 @@
+#pragma once
+
 #include <fstream>
 #include <string>
 #include <unordered_map>
@@ -12,8 +14,8 @@ template <typename K, typename V> struct persist_map {
   ~persist_map() { persist(); }
   persist_map(const persist_map &rhs) = delete;
 
-  V get(const K &key) { return data[key]; }
-  void set(const K &key, const V &value) { data[key] = value; }
+  V &operator[](const K &key) { return data[key]; }
+  bool exist(const K &key) { return data.count(key); }
 
   void load() {
     std::ifstream fh(get_file_path());
