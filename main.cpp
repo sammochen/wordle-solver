@@ -8,7 +8,7 @@
 #include <vector>
 
 void obj() {
-  const std::vector<int> explorations = {3, 7, 2};
+  const std::vector<int> explorations = {1};
 
   std::vector<types::target_t> targets(io::NUM_TARGETS);
   std::iota(targets.begin(), targets.end(), 0);
@@ -26,7 +26,4 @@ void test() {
   auto best_guesses = heuristic::get_best_guesses(targets, 20);
 }
 
-int main() {
-  persist::persist_map<std::string, int> pm("temp");
-  std::cout << pm.get("king");
-}
+int main() { obj(); }

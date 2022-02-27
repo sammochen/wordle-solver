@@ -36,7 +36,6 @@ get_best_guesses(const std::vector<types::target_t> &possible_targets,
   std::vector<types::guess_t> guesses;
   guesses.reserve(max_size);
   for (const auto &[score, guess] : guess_scores) {
-    std::cout << io::guess_words[guess] << ' ' << score << std::endl;
     guesses.push_back(guess);
   }
   return guesses;

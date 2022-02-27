@@ -3,7 +3,6 @@
 #include <unordered_map>
 
 namespace persist {
-
 template <typename K, typename V> struct persist_map {
   const std::string name;
   std::unordered_map<K, V> data;
@@ -13,7 +12,7 @@ template <typename K, typename V> struct persist_map {
   ~persist_map() { persist(); }
   persist_map(const persist_map &rhs) = delete;
 
-  V get(const K &key) { return data.count(key) ? data[key] : default_value; }
+  V get(const K &key) { return data[key]; }
   void set(const K &key, const V &value) { data[key] = value; }
 
   void load() {
@@ -32,5 +31,4 @@ template <typename K, typename V> struct persist_map {
     }
   }
 };
-
 } // namespace persist
