@@ -7,10 +7,9 @@
 #include <numeric>
 #include <vector>
 
-const std::vector<int> explores = {1};
+const std::vector<int> explores = {7, 3};
 
 void obj() {
-
   std::vector<types::target_t> targets(io::NUM_TARGETS);
   std::iota(targets.begin(), targets.end(), 0);
 

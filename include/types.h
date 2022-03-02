@@ -4,31 +4,35 @@
 
 namespace types {
 template <int Base> struct base_int {
+  int key = 0;
+
   base_int(int key) : key(key) {}
   base_int(int n, int v) {
     for (int i = 0; i < n; i++) {
       set(i, v);
     }
   }
-
-  int base_pow(int p) const {
-    if (p == 0)
-      return 1;
-    int half_pow = base_pow(p / 2);
-
-    return p % 2 ? half_pow * half_pow * Base : half_pow * half_pow;
+  base_int(const std::vector<int> &arr) {
+    for (int i = 0; i < arr.size(); i++) {
+      set(i, arr[i]);
+    }
   }
 
-  int key = 0;
+  int get(int index) const { return (key / base_pow(index)) % Base; }
   void set(int index, int value) {
     assert(value >= 0 && value < Base);
     key -= get(index) * base_pow(index);
     key += value * base_pow(index);
   }
 
-  int get(int index) const { return (key / base_pow(index)) % Base; }
+  bool operator==(const base_int<Base> &rhs) const { return key == rhs.key; }
 
-  bool operator==(const base_int<Base> &rhs) { return key == rhs.key; }
+  int base_pow(int p) const {
+    if (p == 0)
+      return 1;
+    int half_pow = base_pow(p / 2);
+    return p % 2 ? half_pow * half_pow * Base : half_pow * half_pow;
+  }
 };
 
 using guess_t = int;  // index to guess_words

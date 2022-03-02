@@ -13,8 +13,8 @@ double get_guess_score(const types::guess_t &guess,
   const auto partitions = wordle::get_partitions(guess, possible_targets);
   double sum = 0;
   for (auto &[result_key, targets] : partitions) {
-    // if (result_key == types::GGGGG_KEY)
-    //   continue;
+    if (result_key == types::GGGGG_KEY)
+      continue;
     double p = targets.size() / (double)partitions.size();
     sum += -p; // Find the average size of the partitions
   }
@@ -38,6 +38,7 @@ get_best_guesses(const std::vector<types::target_t> &possible_targets,
   for (const auto &[score, guess] : guess_scores) {
     guesses.push_back(guess);
   }
+  std::reverse(guesses.begin(), guesses.end());
   return guesses;
 }
 } // namespace heuristic
