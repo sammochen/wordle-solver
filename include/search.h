@@ -29,10 +29,10 @@ struct state {
         possible_targets(std::move(possible_targets)),
         explores(std::move(explores)) {}
 
-  std::string key() const { // return some key of guesses, results, and explores
+  std::string key() const {
+    // return some key of guesses, results, and explores
     std::vector<std::string> ids;
     ids.push_back(utils::join(guesses, ','));
-
     ids.push_back(utils::join(result_keys, ','));
     ids.push_back(utils::join(explores, ','));
     return utils::join(ids, '-');

@@ -7,9 +7,7 @@
 #include <numeric>
 #include <vector>
 
-const std::vector<int> explores = {7, 3};
-
-void obj() {
+void obj(const std::vector<int> &explores) {
   std::vector<types::target_t> targets(io::NUM_TARGETS);
   std::iota(targets.begin(), targets.end(), 0);
 
@@ -18,7 +16,7 @@ void obj() {
   std::cout << io::guess_words[ans.guess] << " " << ans.ev << std::endl;
 }
 
-void test() {
+void test(const std::vector<int> &explores) {
   std::vector<types::target_t> targets(io::NUM_TARGETS);
   std::iota(targets.begin(), targets.end(), 0);
 
@@ -26,4 +24,10 @@ void test() {
   auto best_guesses = heuristic::get_best_guesses(targets, 20);
 }
 
-int main() { obj(); }
+int main(int argc, char *argv[]) {
+  std::vector<int> explores;
+  for (int i = 1; i < argc; i++) {
+    explores.push_back(std::stoi(argv[i]));
+  }
+  obj(explores);
+}
