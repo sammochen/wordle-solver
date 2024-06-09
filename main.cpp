@@ -7,21 +7,29 @@
 #include <numeric>
 #include <vector>
 
-void obj(const std::vector<int> &explores) {
+void play(const std::vector<int> &explores) {
   std::vector<types::target_t> targets(io::NUM_TARGETS);
   std::iota(targets.begin(), targets.end(), 0);
 
   const search::state initial_state(targets, explores);
-  auto ans = search::search(initial_state);
-  std::cout << io::guess_words[ans.guess] << " " << ans.ev << std::endl;
-}
+  const search::state game_state =
+      initial_state
+          .make_next_state(io::get_guess_index("house"),
+                           types::base_int<3>(std::string("-Y---")))
+          .make_next_state(io::get_guess_index("bairn"),
+                           types::base_int<3>(std::string("---Y-")))
+          .make_next_state(io::get_guess_index("pluot"),
+                           types::base_int<3>(std::string("---Y-")))
+          .make_next_state(io::get_guess_index("frock"),
+                           types::base_int<3>(std::string("-GGY-")));
 
-void test(const std::vector<int> &explores) {
-  std::vector<types::target_t> targets(io::NUM_TARGETS);
-  std::iota(targets.begin(), targets.end(), 0);
-
-  const search::state initial_state(targets, explores);
-  auto best_guesses = heuristic::get_best_guesses(targets, 20);
+  auto ans = search::search(game_state);
+  if (ans.guess == -1) {
+    std::cout << "Something went wrong - failed to search, ans.guess=1"
+              << std::endl;
+  } else {
+    std::cout << io::guess_words[ans.guess] << " " << ans.ev << std::endl;
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -29,5 +37,5 @@ int main(int argc, char *argv[]) {
   for (int i = 1; i < argc; i++) {
     explores.push_back(std::stoi(argv[i]));
   }
-  obj(explores);
+  play(explores);
 }
